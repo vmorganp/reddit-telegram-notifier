@@ -1,0 +1,10 @@
+queries:
+  cats: >-
+    (cats OR cat OR kitten)
+    (NOT cat NOT cats)
+    AND (subreddit:aww OR subreddit:eyebleach)
+
+  dogs: >-
+    (dog OR dogs OR puppy)
+    (NOT cat NOT cats)
+    AND (subreddit:aww OR subreddit:eyebleach)

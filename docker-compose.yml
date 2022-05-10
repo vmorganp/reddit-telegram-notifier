@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+    reddit-post-notifier:
+        container_name: reddit-post-notifier
+        build: .
+        restart: unless-stopped
+        volumes:
+            - ./config.yaml:/config.yaml
+        environment: 
+        # you'll have to look up how to get all of these values
+        # I can't be bothered to document it right now
+        - REDDIT_CLIENT_ID=XXXXXXXXXXXXXX
+        - REDDIT_CLIENT_SECRET=XXXXXXXXXXXXXX
+        - REDDIT_USERNAME=XXXXXXXXXXXXXX
+        - REDDIT_PASSWORD=XXXXXXXXXXXXXX
+        - TELEGRAM_TOKEN=XXXXXXXXXXXXXX
+        - TELEGRAM_CHANNEL_ID=XXXXXXXXXXXXXX
+        - INTERVAL=30
