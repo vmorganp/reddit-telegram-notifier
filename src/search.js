@@ -45,7 +45,11 @@ async function searchRedditAndNotify(query, time = "day", syntax = "lucene") {
     console.log(posts.length);
     posts.forEach(post => {
         if (!post.hidden) {
-            var info = ["Title: " + post.title, "Post Url: " + post.url, "Reddit link: https://reddit.com" + post.permalink]
+            var info = [
+                "Title: " + post.title,
+                "[Site Url]("+post.url+")",
+                "[Reddit link](https://reddit.com"+post.permalink+")"
+            ]
             telegramNotify(info)
         }
         // make it so the post doesn't show up in the future if notified about it
