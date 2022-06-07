@@ -42,7 +42,7 @@ async function searchRedditAndNotify(query, time = "day", syntax = "lucene") {
     var posts = await r.search({ query: query, time: time, syntax: syntax })
     posts.forEach(post => {
         if (!post.hidden) {
-            var info = [
+            let info = [
                 "Title: " + post.title,
                 "[Site Url]("+post.url+")",
                 "[Reddit link](https://reddit.com"+post.permalink+")"
@@ -56,7 +56,8 @@ async function searchRedditAndNotify(query, time = "day", syntax = "lucene") {
 
 
 async function telegramNotify(info) {
-    bot.sendMessage(telegram_channel, info.join("\n"))
+    console.log("Sending message in telegram")
+    bot.sendMessage(telegram_channel, info.join("\n"), {"parse_mode": 'Markdown'})
 }
 
 
