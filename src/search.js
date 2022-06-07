@@ -1,6 +1,6 @@
 'use strict';
 const snoowrap = require('snoowrap');
-const Telegram = require('telegram-notify');
+const TelegramBot = require('node-telegram-bot-api');
 
 // required for reading config
 const yaml = require('js-yaml');
@@ -12,7 +12,7 @@ const reddit_clientSecret = process.env.REDDIT_CLIENT_SECRET;
 const reddit_username = process.env.REDDIT_USERNAME;
 const reddit_password = process.env.REDDIT_PASSWORD;
 
-const telegram_token = process.env.TELEGRAM_TOKEN
+const bot = new TelegramBot(process.env.TELEGRAM_TOKEN);
 const telegram_channel = process.env.TELEGRAM_CHANNEL_ID
 
 const interval = process.env.INTERVAL
@@ -26,11 +26,10 @@ const r = new snoowrap({
     password: reddit_password
 });
 // configure  telegram
-let notify = new Telegram({ token: telegram_token, chatId: telegram_channel });
 
 
 async function main() {
-    console.log("Running");
+    console.log("querying...");
     getConfig().forEach(query => {
         searchRedditAndNotify(query)
     });
@@ -40,9 +39,7 @@ async function main() {
 // search for stuff within the last day using the websites search syntax
 // there is a max length to this query, but I don't know what it is
 async function searchRedditAndNotify(query, time = "day", syntax = "lucene") {
-    console.log(query);
     var posts = await r.search({ query: query, time: time, syntax: syntax })
-    console.log(posts.length);
     posts.forEach(post => {
         if (!post.hidden) {
             var info = [
@@ -59,8 +56,7 @@ async function searchRedditAndNotify(query, time = "day", syntax = "lucene") {
 
 
 async function telegramNotify(info) {
-    let x = await notify.send(info.join("\n"));
-    console.log(x);
+    bot.sendMessage(telegram_channel, info.join("\n"))
 }
 
 
