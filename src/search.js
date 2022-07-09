@@ -15,30 +15,42 @@ const reddit_password = process.env.REDDIT_PASSWORD;
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN);
 const telegram_channel = process.env.TELEGRAM_CHANNEL_ID
 
-const interval = process.env.INTERVAL
+const interval = parseInt(process.env.INTERVAL)*1000
+
 
 // configure reddit
 const r = new snoowrap({
-    userAgent: 'nodeJS',
+    userAgent: 'jsTeleNotifier by vmorganp',
     clientId: reddit_clientId,
     clientSecret: reddit_clientSecret,
     username: reddit_username,
     password: reddit_password
 });
-// configure  telegram
 
 
-async function main() {
+function main() {
     console.log("querying...");
+    let queries = getConfig()
+    // // return
+    // queries.forEach(element => {
+    //     console.log(element)
+    // });
     getConfig().forEach(query => {
         searchRedditAndNotify(query)
     });
+    if (isNaN(interval)) {
+        console.log("Your interval is not a number")
+        setTimeout(main, 60000);    
+    } else{
+        setTimeout(main, interval);
+    }
 }
 
 
 // search for stuff within the last day using the websites search syntax
 // there is a max length to this query, but I don't know what it is
 async function searchRedditAndNotify(query, time = "day", syntax = "lucene") {
+    console.log(query)
     var posts = await r.search({ query: query, time: time, syntax: syntax })
     posts.forEach(post => {
         if (!post.hidden) {
@@ -64,19 +76,10 @@ async function telegramNotify(info) {
 function getConfig() {
     try {
         const doc = yaml.load(fs.readFileSync('/config.yaml', 'utf8'));
-        let queries = []
-        Object.values(doc.queries).forEach(query => {
-            queries.push(query)
-        });
-        console.log(queries);
-        return queries
+        return Object.values(doc.queries);
     } catch (e) {
         console.log(e);
     }
 }
 
-// this is purely here so it runs asap instead of waiting on the first run
 main()
-setInterval(function () {
-    main()
-}, interval * 1000);
