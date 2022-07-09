@@ -1,6 +1,6 @@
-FROM node:17-alpine
+FROM python:3.8.13-slim-bullseye
 WORKDIR /usr/src/app
-COPY src/package*.json ./
-RUN npm install
-COPY src/search.js .
-CMD ["node", "search.js"]
+COPY src/requirements.txt ./
+RUN pip3 install -r requirements.txt
+COPY src/main.py .
+CMD ["python3", "-u", "main.py"]

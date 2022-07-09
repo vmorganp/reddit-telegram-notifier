@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "js-yaml": "^4.1.0",
-    "node-telegram-bot-api": "^0.57.0",
-    "snoowrap": "^1.23.0"
-  }
-}
