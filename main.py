@@ -1,5 +1,5 @@
 from telegram import Update, Bot
-from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -170,6 +170,7 @@ def telegram_bot():
     application.add_handler(CommandHandler("list", listQueries))
     application.add_handler(CommandHandler("add", addQuery))
     application.add_handler(CommandHandler("remove", removeQuery))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, start))
 
     # Run bot and notifier
     print("Starting Telegram bot")
