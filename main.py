@@ -67,7 +67,11 @@ The best way to do this is to go to reddit, and type in a search. Refine your se
 
 `/add`
 
-Once you're done refining your search, come back here and use the /add command to add the query. From then on, the bot will send you new results for that query.
+Once you're done refining your search, come back here and use the `/add` command to add the query. From then on, the bot will send you new results for that query.
+Be sure to put your search between single quotes like so:
+```text
+/add 'puppies subreddit:awww'
+```
 
 `/list`
 
@@ -76,8 +80,6 @@ List the queries you've saved. This is also shown after each /add or /remove com
 `/remove`
 
 remove a query from the search. Start with running the /remove command and pick the query you don't want anymore
-
-
     """
     await update.message.reply_markdown(
         helptext,
@@ -100,7 +102,7 @@ async def listQueries(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
 async def addQuery(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.message.from_user.id
-    query = update.message.text.split(" ", 1)[1]
+    query = update.message.text.split("'")[1]
     user_query = UserQuery(user_id=user_id, query=query)
     session.add(user_query)
     session.commit()
@@ -138,13 +140,13 @@ def search_reddit():
                 for my_query in queries:
                     try:
                         query_id, user, query, last = my_query
-                        results = reddit.subreddit("all").search(query, sort="new", limit=20, time_filter="all")
+                        results = reddit.subreddit("all").search(query, sort="new", limit=20, time_filter="day")
                         # Keep the first (newest) response from each search, so that we can stop showing more after that one
                         first = True
                         for submission in results:
                             if submission.id == last:
                                 break
-                            message = f"New post matching your query `{query}`:\n{submission.title}\n[Site Url]({submission.url})\n[Reddit Link]({submission.shortlink})"
+                            message = f"{submission.title}\nFound by query: `{query}`\n[Site Url]({submission.url})\n[Reddit Link]({submission.shortlink})"
                             await bot.send_message(chat_id=user, text=message, parse_mode="Markdown")
                             if first:
                                 session.query(UserQuery).filter(UserQuery.id == query_id).update(

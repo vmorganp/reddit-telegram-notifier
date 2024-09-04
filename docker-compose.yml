@@ -4,7 +4,9 @@ services:
     build: .
     restart: unless-stopped
     volumes:
-      - ./queries.db:/app/queries.db
+      - type: bind
+        source: ./queries.db
+        target: /app/queries.db
     environment:
       - REDDIT_CLIENT_ID=<replaceME>
       - REDDIT_CLIENT_SECRET=<replaceME>
