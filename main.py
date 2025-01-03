@@ -10,7 +10,7 @@ import os
 import time
 
 
-SEARCH_INTEVAL = os.getenv("INTERVAL", 300)
+SEARCH_INTERVAL = os.getenv("INTERVAL", 300)
 
 
 ################################################################################
@@ -130,34 +130,32 @@ async def removeQuery(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 def search_reddit():
     async def async_wrapper():
         while True:
-            async with Bot(TELEGRAM_TOKEN) as bot:
-                queries = (
-                    session.query(UserQuery.id, UserQuery.user_id, UserQuery.query, UserQuery.last_id)
-                    .order_by(UserQuery.id)
-                    .all()
-                )
-                for my_query in queries:
-                    try:
-                        query_id, user, query, last = my_query
-                        results = reddit.subreddit("all").search(query, sort="new", limit=20, time_filter="day")
-                        # Keep the first (newest) response from each search, so that we can stop showing more after that one
-                        first = True
-                        for submission in results:
-                            if submission.id == last:
-                                break
-                            message = f"{submission.title}\nFound by query: `{query}`\n[Site Url]({submission.url})\n[Reddit Link]({submission.shortlink})"
+            queries = (
+                session.query(UserQuery.id, UserQuery.user_id, UserQuery.query, UserQuery.last_id)
+                .order_by(UserQuery.id)
+                .all()
+            )
+            for my_query in queries:
+                try:
+                    query_id, user, query, last = my_query
+                    results = reddit.subreddit("all").search(query, sort="new", limit=20, time_filter="day")
+                    # Keep the first (newest) response from each search, so that we can stop showing more after that one
+                    first = True
+                    for submission in results:
+                        if submission.id == last:
+                            break
+                        message = f"{submission.title}\nFound by query: `{query}`\n[Site Url]({submission.url})\n[Reddit Link]({submission.shortlink})"
+                        async with Bot(TELEGRAM_TOKEN) as bot:
                             await bot.send_message(chat_id=user, text=message, parse_mode="Markdown")
-                            if first:
-                                session.query(UserQuery).filter(UserQuery.id == query_id).update(
-                                    {"last_id": submission.id}
-                                )
-                                session.commit()
-                                first = False
+                        if first:
+                            session.query(UserQuery).filter(UserQuery.id == query_id).update({"last_id": submission.id})
+                            session.commit()
+                            first = False
 
-                    except Exception as e:
-                        # raise (e)
-                        print(e)
-            time.sleep(int(SEARCH_INTEVAL))
+                except Exception as e:
+                    # raise (e)
+                    print(e)
+            time.sleep(int(SEARCH_INTERVAL))
 
     asyncio.run(async_wrapper())
 
@@ -177,6 +175,7 @@ def telegram_bot():
 
 
 def main():
+    print(f"Will scan or posts every {SEARCH_INTERVAL}")
     p1 = Process(target=telegram_bot)
     p2 = Process(target=search_reddit)
     p1.start()
